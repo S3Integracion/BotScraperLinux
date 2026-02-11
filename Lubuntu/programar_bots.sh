@@ -1,5 +1,5 @@
 #!/bin/bash
-# Programa las tareas de los bots normales en el crontab del usuario actual
+# Programa las tareas del bot en Ubuntu con X11
 
 # Definir rutas absolutas para los scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
@@ -36,7 +36,7 @@ crontab -r 2>/dev/null || echo "No había tareas previas en el crontab."
 # Luego, programa la nueva tarea para el bot Java usando el script wrapper
 echo "Programando nueva tarea para el bot Java..."
 (
-    echo "# Tarea programada para ejecutar el bot Java de lunes a jueves a las 00:30"
+    echo "# Tarea programada para ejecutar el bot Java de lunes a viernes a las 00:30"
     echo "SHELL=/bin/bash"
     echo "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
     echo "30 0 * * 1-5 \"$BOT_WRAPPER\" # Ejecutar bot de scraping"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Script para instalar todas las dependencias necesarias para el bot Java
+# Optimizado para Ubuntu con X11
 # Incluye JDK 21, xdotool, wmctrl, zenity y Firefox
 
 # Colores para los mensajes
@@ -54,14 +55,14 @@ if [ "$(id -u)" -eq 0 ]; then
     exit 1
 fi
 
-# Comprobar si estamos en Xubuntu/Ubuntu
+# Comprobar si estamos en Ubuntu
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     if [[ "$ID" != "ubuntu" && "$ID_LIKE" != *"ubuntu"* ]]; then
-        print_warning "Este script está diseñado para Xubuntu/Ubuntu. Algunas operaciones pueden no funcionar correctamente en $PRETTY_NAME."
+        print_warning "Este script está diseñado para Ubuntu con X11. Algunas operaciones pueden no funcionar correctamente en $PRETTY_NAME."
     fi
 else
-    print_warning "No se pudo determinar la distribución. Este script está diseñado para Xubuntu/Ubuntu."
+    print_warning "No se pudo determinar la distribución. Este script está diseñado para Ubuntu con X11."
 fi
 
 print_message "Iniciando instalación de dependencias para el bot de scraping..."
@@ -166,6 +167,11 @@ print_message "  cd $HOME/scraping/"
 print_message "  java bot"
 print_message ""
 print_message "Para programar la ejecución automática, use el script programar_bots.sh"
+if [ "${XDG_SESSION_TYPE:-}" = "wayland" ]; then
+    print_warning "Sesion Wayland detectada. Use una sesion X11 para evitar limitaciones de automatizacion grafica."
+else
+    print_message "Sesion X11 detectada o no especificada."
+fi
 print_message "=============================================="
 
 exit 0

@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Bot para automatizar tareas de Web Scraping
  * Versión en Java del script bot2.sh
+ * Optimizado para Ubuntu con X11
  * Compatible con Java 21.0.8
  */
 public class bot {
@@ -23,21 +24,21 @@ public class bot {
     private static final String URL = "https://amazon.com";
     private static final int WIN_X = 0;
     private static final int WIN_Y = 0;
-    private static final int WIN_WIDTH = 1240;
-    private static final int WIN_HEIGHT = 720;
+    private static final int WIN_WIDTH = 1920;
+    private static final int WIN_HEIGHT = 1080;
 
     // Coordenadas Y para cada día de la semana (sitemap)
     private static final int COORD_X_SITEMAP = 95; // Coordenada X fija para todos los sitemaps
     private static final Map<Integer, Integer> DAY_COORDINATES = new HashMap<>();
     static {
         // Coordenadas Y para cada día (Calendar.MONDAY = 2, etc.)
-        DAY_COORDINATES.put(Calendar.MONDAY, 195); // Lunes
-        DAY_COORDINATES.put(Calendar.TUESDAY, 215); // Martes
-        DAY_COORDINATES.put(Calendar.WEDNESDAY, 240); // Miércoles
-        DAY_COORDINATES.put(Calendar.THURSDAY, 265); // Jueves
-        DAY_COORDINATES.put(Calendar.FRIDAY, 290); // Viernes (añadido)
-        DAY_COORDINATES.put(Calendar.SATURDAY, 315); // Sábado (añadido)
-        DAY_COORDINATES.put(Calendar.SUNDAY, 340); // Domingo (añadido)
+        DAY_COORDINATES.put(Calendar.MONDAY, 210); // Lunes
+        DAY_COORDINATES.put(Calendar.TUESDAY, 230); // Martes
+        DAY_COORDINATES.put(Calendar.WEDNESDAY, 260); // Miércoles
+        DAY_COORDINATES.put(Calendar.THURSDAY, 280); // Jueves
+        DAY_COORDINATES.put(Calendar.FRIDAY, 310); // Viernes (añadido)
+        DAY_COORDINATES.put(Calendar.SATURDAY, 330); // Sábado (añadido)
+        DAY_COORDINATES.put(Calendar.SUNDAY, 360); // Domingo (añadido)
     }
 
     private static Robot robot;
@@ -53,10 +54,10 @@ public class bot {
             log("========= [" + getCurrentDateTime() + "] Archivo de log limpiado =========");
             log("========= [" + getCurrentDateTime() + "] Iniciando bot.java =========");
 
-            log("Iniciando bot optimizado para Xubuntu");
+            log("Iniciando bot optimizado para Ubuntu con X11");
 
             // Verificar dependencias necesarias
-            checkXubuntuDependencies();
+            checkUbuntuX11Dependencies();
 
             // Inicializar robot para control de ratón y teclado
             robot = new Robot();
@@ -80,8 +81,8 @@ public class bot {
     /**
      * Verifica que las herramientas necesarias estén instaladas
      */
-    private static void checkXubuntuDependencies() {
-        log("Verificando dependencias necesarias...");
+    private static void checkUbuntuX11Dependencies() {
+        log("Verificando dependencias necesarias para Ubuntu X11...");
 
         String[] requiredTools = { "xdotool", "wmctrl" };
         boolean allToolsAvailable = true;
@@ -179,8 +180,8 @@ public class bot {
         log("[Acción] " + description);
         action.run();
 
-        // En Xubuntu, algunas operaciones gráficas pueden necesitar más tiempo
-        if (description.contains("Maximizando") || description.contains("Firefox")) {
+        // En Ubuntu X11, algunas operaciones gráficas pueden necesitar más tiempo
+        if (description.contains("Maximizando") || description.contains("Chrome")) {
             log("Esperando tiempo adicional para operación en ventana...");
             sleep(15000); // 7 segundos para operaciones que involucran ventanas
         } else {
@@ -189,13 +190,13 @@ public class bot {
     }
 
     /**
-     * Abre Firefox con la URL y tamaño especificados, específicamente optimizado
-     * para Xubuntu
+     * Abre Chrome con la URL y tamaño especificados, específicamente optimizado
+    * para Ubuntu X11
      */
-    private static void openFirefox() {
+    private static void openChrome() {
         try {
-            // En Xubuntu, usamos el comando firefox directamente
-            ProcessBuilder processBuilder = new ProcessBuilder("/usr/bin/firefox",
+            // En Ubuntu X11, usamos el comando de Chrome directamente
+            ProcessBuilder processBuilder = new ProcessBuilder("/usr/bin/google-chrome",
                     "--new-window", URL,
                     "--window-size=" + WIN_WIDTH + "," + WIN_HEIGHT,
                     "--window-position=" + WIN_X + "," + WIN_Y);
@@ -205,23 +206,23 @@ public class bot {
             env.put("DISPLAY", ":0");
             // La variable XAUTHORITY generalmente se configura automáticamente
 
-            log("Ejecutando Firefox en Xubuntu...");
+            log("Ejecutando Chrome en Ubuntu X11...");
             Process process = processBuilder.start();
 
-            // Esperar un momento para que Firefox se inicie
+            // Esperar un momento para que Chrome se inicie
             sleep(3000);
 
             // Intentar maximizar la ventana usando xdotool
-            log("Intentando maximizar la ventana de Firefox usando xdotool...");
-            maximizeWindowUsingXdotool("Firefox");
+            log("Intentando maximizar la ventana de Chrome usando xdotool...");
+            maximizeWindowUsingXdotool("Google-chrome");
         } catch (IOException e) {
-            log("Error al abrir Firefox: " + e.getMessage());
+            log("Error al abrir Chrome: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * Maximiza una ventana usando xdotool en Xubuntu
+    * Maximiza una ventana usando xdotool en Ubuntu X11
      * 
      * @param windowName nombre o clase de la ventana para identificarla
      */
@@ -380,44 +381,56 @@ public class bot {
     }
 
     /**
-     * Cierra todas las instancias abiertas de Firefox
+     * Cierra todas las instancias abiertas de Chrome
      */
-    private static void closeAllFirefoxWindows() {
-        log("Cerrando todas las ventanas existentes de Firefox...");
+    private static void closeAllChromeWindows() {
+        log("Cerrando todas las ventanas existentes de Chrome...");
 
         try {
-            // Primero intentamos cerrar Firefox de manera limpia con xdotool
-            ProcessBuilder xdotoolCmd = new ProcessBuilder("bash", "-c",
-                    "xdotool search --class firefox windowactivate --sync %@ key --clearmodifiers alt+F4");
-            Process xdotoolProcess = xdotoolCmd.start();
-            boolean completed = xdotoolProcess.waitFor(5, TimeUnit.SECONDS);
+            // Intentar cerrar solo ventanas de Chrome detectadas por clase
+            ProcessBuilder listWindowsCmd = new ProcessBuilder("bash", "-c",
+                    "xdotool search --onlyvisible --class '(Google-chrome|google-chrome|Chromium|chromium)' 2>/dev/null");
+            Process listProcess = listWindowsCmd.start();
+            java.util.Scanner s = new java.util.Scanner(listProcess.getInputStream()).useDelimiter("\\A");
+            String windowIds = s.hasNext() ? s.next().trim() : "";
+            s.close();
+            listProcess.waitFor(3, TimeUnit.SECONDS);
 
-            if (!completed) {
-                log("El comando xdotool excedió el tiempo de espera, usando método alternativo");
-                xdotoolProcess.destroyForcibly();
+            if (!windowIds.isEmpty()) {
+                for (String windowId : windowIds.split("\\s+")) {
+                    if (windowId.isBlank()) {
+                        continue;
+                    }
+                    new ProcessBuilder("xdotool", "windowactivate", "--sync", windowId,
+                            "windowclose", windowId).start();
+                    sleep(500);
+                }
+            } else {
+                log("No se encontraron ventanas visibles de Chrome");
             }
 
             // Esperamos un momento para que las ventanas se cierren
             sleep(2000);
 
-            // Verificamos si Firefox sigue ejecutándose
-            ProcessBuilder checkCmd = new ProcessBuilder("bash", "-c", "pgrep firefox");
+            // Si Chrome sigue ejecutándose, terminar solo procesos por nombre exacto
+            ProcessBuilder checkCmd = new ProcessBuilder("bash", "-c",
+                    "pgrep -x google-chrome || pgrep -x chrome || pgrep -x chromium");
             Process checkProcess = checkCmd.start();
             int exitCode = checkProcess.waitFor();
 
-            // Si Firefox sigue ejecutándose (exitCode = 0), lo terminamos con pkill
             if (exitCode == 0) {
-                log("Firefox sigue ejecutándose, terminando el proceso con pkill");
-                ProcessBuilder killCmd = new ProcessBuilder("pkill", "-9", "firefox");
-                killCmd.start().waitFor(3, TimeUnit.SECONDS);
+                log("Chrome sigue ejecutándose, terminando procesos por nombre exacto");
+                new ProcessBuilder("pkill", "-9", "-x", "google-chrome").start().waitFor(3, TimeUnit.SECONDS);
+                new ProcessBuilder("pkill", "-9", "-x", "chrome").start().waitFor(3, TimeUnit.SECONDS);
+                new ProcessBuilder("pkill", "-9", "-x", "chromium").start().waitFor(3, TimeUnit.SECONDS);
             }
 
             // Esperamos un poco más para asegurarnos que el proceso terminó
             sleep(2000);
 
-            log("Todas las ventanas de Firefox han sido cerradas");
+            log("Todas las ventanas de Chrome han sido cerradas");
         } catch (IOException | InterruptedException e) {
-            log("Error al cerrar Firefox: " + e.getMessage());
+            log("Error al cerrar Chrome: " + e.getMessage());
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
@@ -425,50 +438,112 @@ public class bot {
     }
 
     /**
-     * Verifica si el sistema operativo es Xubuntu
+    * Verifica si el sistema operativo es Ubuntu con X11
      */
-    private static boolean isXubuntu() {
+    private static boolean isUbuntuX11() {
         String os = System.getProperty("os.name").toLowerCase();
         if (!os.contains("linux")) {
             return false;
         }
 
         try {
-            // Verificar si estamos en XFCE (que es el entorno de Xubuntu)
-            ProcessBuilder desktopCheck = new ProcessBuilder("bash", "-c",
-                    "echo $XDG_CURRENT_DESKTOP || echo $DESKTOP_SESSION");
-            desktopCheck.redirectErrorStream(true);
-            Process process = desktopCheck.start();
-
-            java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
-            String desktop = s.hasNext() ? s.next().trim().toLowerCase() : "";
-            s.close();
-
-            // Verificar si estamos específicamente en Xubuntu
             ProcessBuilder distroCheck = new ProcessBuilder("bash", "-c",
-                    "cat /etc/lsb-release 2>/dev/null | grep -i xubuntu || cat /etc/os-release 2>/dev/null | grep -i xubuntu");
+                    "cat /etc/os-release 2>/dev/null | grep -i 'ubuntu' || cat /etc/lsb-release 2>/dev/null | grep -i 'ubuntu'");
             distroCheck.redirectErrorStream(true);
             Process distroProcess = distroCheck.start();
 
-            s = new java.util.Scanner(distroProcess.getInputStream()).useDelimiter("\\A");
+            java.util.Scanner s = new java.util.Scanner(distroProcess.getInputStream()).useDelimiter("\\A");
             String distro = s.hasNext() ? s.next().trim().toLowerCase() : "";
             s.close();
 
-            boolean isXfce = desktop.contains("xfce");
-            boolean isXubuntu = !distro.isEmpty() || desktop.contains("xubuntu");
+            String sessionType = System.getenv("XDG_SESSION_TYPE");
+            boolean isUbuntu = !distro.isEmpty();
+            boolean isX11Session = sessionType == null || sessionType.trim().equalsIgnoreCase("x11");
 
-            log("Detección de entorno: XFCE=" + isXfce + ", Xubuntu=" + isXubuntu);
-
-            // Consideramos que es Xubuntu si detectamos XFCE o Xubuntu en alguna parte
-            return isXfce || isXubuntu;
+            log("Detección de entorno: Ubuntu=" + isUbuntu + ", X11=" + isX11Session);
+            return isUbuntu && isX11Session;
         } catch (Exception e) {
-            log("Error al verificar si es Xubuntu: " + e.getMessage());
+            log("Error al verificar si es Ubuntu X11: " + e.getMessage());
             return false;
         }
     }
 
+    private static boolean isWaylandSession() {
+        String sessionType = System.getenv("XDG_SESSION_TYPE");
+        if (sessionType == null) {
+            return false;
+        }
+        return sessionType.trim().equalsIgnoreCase("wayland");
+    }
+
+    private static void setupDisplayEnvironment(Map<String, String> env) {
+        String display = env.get("DISPLAY");
+        if (display == null || display.isBlank()) {
+            env.put("DISPLAY", ":0");
+        }
+
+        if (isWaylandSession()) {
+            log("Sesión Wayland detectada. Se intentará usar XWayland para compatibilidad con xdotool.");
+            env.put("GDK_BACKEND", "x11");
+        } else {
+            env.put("GDK_BACKEND", "x11");
+        }
+    }
+
+    private static java.util.List<String> buildChromeCommand(String chromeCmd) {
+        java.util.List<String> args = new java.util.ArrayList<>();
+        args.add(chromeCmd);
+        args.add("--new-window");
+        args.add(URL);
+        args.add("--window-size=" + WIN_WIDTH + "," + WIN_HEIGHT);
+        args.add("--window-position=" + WIN_X + "," + WIN_Y);
+        args.add("--no-first-run");
+        args.add("--no-default-browser-check");
+        args.add("--disable-session-crashed-bubble");
+        args.add("--disable-infobars");
+
+        if (isWaylandSession()) {
+            args.add("--ozone-platform=x11");
+            args.add("--disable-features=UseOzonePlatform");
+        }
+
+        return args;
+    }
+
+    private static void dismissRestorePopupIfPresent() {
+        log("Verificando popup de restaurar páginas...");
+
+        try {
+            ProcessBuilder popupCmd = new ProcessBuilder("bash", "-c",
+                    "xdotool search --onlyvisible --name 'Restaurar|restore|Reiniciar|Restore pages|Restore' | head -n 1");
+            Process popupProcess = popupCmd.start();
+            java.util.Scanner s = new java.util.Scanner(popupProcess.getInputStream()).useDelimiter("\\A");
+            String popupWindowId = s.hasNext() ? s.next().trim() : "";
+            s.close();
+
+            if (popupWindowId.isEmpty()) {
+                log("No se detectó popup de restauración");
+                return;
+            }
+
+            log("Popup de restauración detectado: " + popupWindowId);
+            new ProcessBuilder("xdotool", "windowactivate", "--sync", popupWindowId).start();
+            sleep(500);
+
+            pressKey(KeyEvent.VK_ESCAPE);
+            sleep(500);
+
+            pressKey(KeyEvent.VK_TAB);
+            sleep(300);
+            pressKey(KeyEvent.VK_ENTER);
+            sleep(1000);
+        } catch (IOException e) {
+            log("Error al manejar popup de restauración: " + e.getMessage());
+        }
+    }
+
     /**
-     * Verifica si las DevTools están abiertas en Firefox en Xubuntu
+    * Verifica si las DevTools están abiertas en Chrome en Ubuntu X11
      * 
      * @return true si las DevTools están abiertas, false en caso contrario
      */
@@ -476,23 +551,23 @@ public class bot {
         log("Verificando si las DevTools están abiertas...");
 
         try {
-            // Método optimizado para XFCE/Xubuntu: buscar DevTools en el título de ventana
+            // Método optimizado para X11: buscar DevTools en el título de ventana
             ProcessBuilder titleCheckCmd = new ProcessBuilder("bash", "-c",
-                    "xdotool search --onlyvisible --class 'Firefox' getwindowname | grep -E 'DevTools|Inspector|Depurador|Herramientas|Ferramenta|Desarrollador'");
+                    "xdotool search --onlyvisible --class '(Google-chrome|google-chrome|Chromium|chromium)' getwindowname | grep -E 'DevTools|Inspector|Depurador|Herramientas|Ferramenta|Desarrollador'");
             Process titleCheckProcess = titleCheckCmd.start();
             java.util.Scanner s = new java.util.Scanner(titleCheckProcess.getInputStream()).useDelimiter("\\A");
             String result = s.hasNext() ? s.next().trim() : "";
             s.close();
 
             if (!result.isEmpty()) {
-                log("DevTools detectadas en título de ventana Firefox");
+                log("DevTools detectadas en título de ventana Chrome");
                 return true;
             }
 
-            // Verificar si hay una ventana secundaria de Firefox (posible DevTools
+            // Verificar si hay una ventana secundaria de Chrome (posible DevTools
             // separada)
             ProcessBuilder windowCountCmd = new ProcessBuilder("bash", "-c",
-                    "xdotool search --onlyvisible --class 'Firefox' | wc -l");
+                    "xdotool search --onlyvisible --class '(Google-chrome|google-chrome|Chromium|chromium)' | wc -l");
             Process windowCountProcess = windowCountCmd.start();
             s = new java.util.Scanner(windowCountProcess.getInputStream()).useDelimiter("\\A");
             String countResult = s.hasNext() ? s.next().trim() : "0";
@@ -500,7 +575,7 @@ public class bot {
 
             int windowCount = Integer.parseInt(countResult);
             if (windowCount > 1) {
-                log("Múltiples ventanas de Firefox detectadas (" + windowCount + ") - Posibles DevTools separadas");
+                log("Múltiples ventanas de Chrome detectadas (" + windowCount + ") - Posibles DevTools separadas");
                 return true;
             }
 
@@ -513,23 +588,19 @@ public class bot {
     }
 
     /**
-     * Maximiza una ventana usando métodos específicos de XFCE
+    * Maximiza una ventana usando métodos específicos para X11
      */
-    private static void maximizeWindowUsingXfce(String windowClass) {
+    private static void maximizeWindowUsingX11(String windowClass) {
         try {
-            log("Maximizando ventana '" + windowClass + "' usando métodos específicos para entorno gráfico");
+            log("Maximizando ventana '" + windowClass + "' usando métodos específicos para X11");
 
-            // Obtener ID de la ventana
-            ProcessBuilder getWindowIdCmd = new ProcessBuilder("bash", "-c",
-                    "xdotool search --class \"" + windowClass + "\" | head -n 1");
-            Process process = getWindowIdCmd.start();
-
-            java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
-            String windowId = s.hasNext() ? s.next().trim() : "";
-            s.close();
+            String windowId = findWindowIdByClass(windowClass, 5, 1000);
+            if (windowId.isEmpty()) {
+                windowId = findChromeWindowId(5, 1000);
+            }
 
             if (!windowId.isEmpty()) {
-                // Método 1: usar xfwm4 específico de XFCE si está disponible
+                // Método 1: usar xfwm4 si está disponible (entornos basados en XFCE)
                 if (isCommandAvailable("xfwm4-command")) {
                     new ProcessBuilder("bash", "-c",
                             "WINDOW_ID=" + windowId + " && xfwm4-command --maximize").start();
@@ -552,6 +623,80 @@ public class bot {
         }
     }
 
+    private static String findWindowIdByClass(String windowClass, int maxRetries, long delayMs) throws IOException {
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            ProcessBuilder getWindowIdCmd = new ProcessBuilder("bash", "-c",
+                    "xdotool search --onlyvisible --class \"" + windowClass + "\" | head -n 1");
+            Process process = getWindowIdCmd.start();
+            java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
+            String windowId = s.hasNext() ? s.next().trim() : "";
+            s.close();
+            if (!windowId.isEmpty()) {
+                return windowId;
+            }
+            sleep(delayMs);
+        }
+        return "";
+    }
+
+    private static String findChromeWindowId(int maxRetries, long delayMs) throws IOException {
+        String[] classPatterns = {
+                "(Google-chrome|google-chrome|Chromium|chromium)",
+                "(Chrome|chrome)"
+        };
+        String[] namePatterns = {
+                "Google Chrome|Chromium|Chrome"
+        };
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            for (String classPattern : classPatterns) {
+                ProcessBuilder cmd = new ProcessBuilder("bash", "-c",
+                        "xdotool search --onlyvisible --class '" + classPattern + "' | head -n 1");
+                Process process = cmd.start();
+                java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
+                String windowId = s.hasNext() ? s.next().trim() : "";
+                s.close();
+                if (!windowId.isEmpty()) {
+                    log("Ventana Chrome encontrada por clase: " + windowId);
+                    return windowId;
+                }
+            }
+
+            for (String namePattern : namePatterns) {
+                ProcessBuilder cmd = new ProcessBuilder("bash", "-c",
+                        "xdotool search --onlyvisible --name '" + namePattern + "' | head -n 1");
+                Process process = cmd.start();
+                java.util.Scanner s = new java.util.Scanner(process.getInputStream()).useDelimiter("\\A");
+                String windowId = s.hasNext() ? s.next().trim() : "";
+                s.close();
+                if (!windowId.isEmpty()) {
+                    log("Ventana Chrome encontrada por nombre: " + windowId);
+                    return windowId;
+                }
+            }
+
+            sleep(delayMs);
+        }
+
+        return "";
+    }
+
+    private static boolean activateChromeWindow() {
+        try {
+            String windowId = findChromeWindowId(5, 1000);
+            if (windowId.isEmpty()) {
+                log("No se pudo encontrar una ventana de Chrome para activar");
+                return false;
+            }
+            new ProcessBuilder("xdotool", "windowactivate", "--sync", windowId).start();
+            sleep(500);
+            return true;
+        } catch (IOException e) {
+            log("Error al activar ventana de Chrome: " + e.getMessage());
+            return false;
+        }
+    }
+
     /**
      * Intenta abrir las DevTools con métodos específicos
      */
@@ -559,11 +704,15 @@ public class bot {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             log("Intento " + attempt + " de " + maxRetries + " para abrir DevTools");
 
+            if (!activateChromeWindow()) {
+                log("No se pudo activar Chrome antes de abrir DevTools");
+            }
+
             // Intentar con Ctrl+Shift+I
             pressKeys(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_I);
             sleep(2000);
 
-            // Si falló, intentar con F12 que también funciona en Firefox
+            // Si falló, intentar con F12
             if (!areDevToolsOpen()) {
                 log("Intentando con F12...");
                 pressKey(KeyEvent.VK_F12);
@@ -618,82 +767,84 @@ public class bot {
         log("Coordenadas del sitemap a utilizar: X=" + COORD_X_SITEMAP + ", Y=" + sitemapYCoord);
         log("=======================================");
 
-        // Cerrar todas las ventanas existentes de Firefox antes de comenzar
-        runStep("Cerrando ventanas existentes de Firefox", () -> {
-            closeAllFirefoxWindows();
+        // Cerrar todas las ventanas existentes de Chrome antes de comenzar
+        runStep("Cerrando ventanas existentes de Chrome", () -> {
+            closeAllChromeWindows();
         });
 
-        // Abrir Firefox con la URL especificada
-        runStep("Abriendo Firefox", () -> {
+        // Abrir Chrome con la URL especificada
+        runStep("Abriendo Chrome", () -> {
             try {
-                // Usar firefox o firefox-esr según esté disponible
-                String firefoxCmd = isCommandAvailable("firefox") ? "firefox"
-                        : (isCommandAvailable("firefox-esr") ? "firefox-esr" : "/usr/bin/firefox");
+            // Usar google-chrome o alternativas según estén disponibles
+            String chromeCmd = isCommandAvailable("google-chrome") ? "google-chrome"
+                : (isCommandAvailable("google-chrome-stable") ? "google-chrome-stable"
+                    : (isCommandAvailable("chromium-browser") ? "chromium-browser" : "/usr/bin/google-chrome"));
 
-                ProcessBuilder processBuilder = new ProcessBuilder(firefoxCmd,
-                        "--new-window", URL,
-                        "--window-size=" + WIN_WIDTH + "," + WIN_HEIGHT);
+            ProcessBuilder processBuilder = new ProcessBuilder(buildChromeCommand(chromeCmd));
 
                 // Configurar variables de entorno para entornos gráficos
                 Map<String, String> env = processBuilder.environment();
-                env.put("DISPLAY", ":0");
+                setupDisplayEnvironment(env);
 
-                log("Ejecutando Firefox...");
+                log("Ejecutando Chrome...");
                 Process process = processBuilder.start();
 
-                // Esperar a que Firefox se inicie
+                // Esperar a que Chrome se inicie
                 sleep(5000);
 
-                // Maximizar usando métodos específicos de XFCE
-                maximizeWindowUsingXfce("Firefox");
+                // Maximizar usando métodos específicos para X11
+                maximizeWindowUsingX11("Google-chrome");
+                dismissRestorePopupIfPresent();
             } catch (IOException e) {
-                log("Error al abrir Firefox: " + e.getMessage());
+                log("Error al abrir Chrome: " + e.getMessage());
                 e.printStackTrace();
             }
         });
 
-        // Esperar a que Firefox se abra completamente
+        // Esperar a que Chrome se abra completamente
         sleep(6000); // 6 segundos como en el script original
 
         // Abrir DevTools con sistema de reintentos
+        final boolean[] devToolsOpened = { false };
         runStep("Abriendo DevTools", () -> {
-            if (!openDevToolsWithRetry(3)) {
+            devToolsOpened[0] = openDevToolsWithRetry(3);
+            if (!devToolsOpened[0]) {
                 log("ADVERTENCIA: No se pudieron abrir las DevTools después de múltiples intentos");
                 log("El proceso continuará, pero podría no funcionar correctamente");
             }
         });
 
         // Solo continuar si se abrieron las DevTools
-        if (areDevToolsOpen()) {
-            // Maximizar las DevTools específicamente para XFCE/Xubuntu
-            runStep("Maximizando DevTools en Xubuntu/XFCE", () -> {
+        if (devToolsOpened[0]) {
+            // Maximizar las DevTools específicamente para Ubuntu X11
+            runStep("Maximizando DevTools en Ubuntu X11", () -> {
                 try {
-                    // Usar XFCE-specific command para maximizar la ventana activa
+                    // Usar comando para maximizar la ventana activa
                     ProcessBuilder xfceMaximizeCmd = new ProcessBuilder("bash", "-c",
                             "xdotool getactivewindow windowsize 100% 100%");
                     xfceMaximizeCmd.start();
                     sleep(500);
 
-                    // Método adicional específico de XFCE para maximizar
+                    // Método adicional para maximizar
                     ProcessBuilder wmctrlCmd = new ProcessBuilder("wmctrl", "-r", ":ACTIVE:", "-b",
                             "add,maximized_vert,maximized_horz");
                     wmctrlCmd.start();
                 } catch (IOException e) {
-                    log("Error al maximizar DevTools en Xubuntu: " + e.getMessage());
+                    log("Error al maximizar DevTools en Ubuntu X11: " + e.getMessage());
                 }
             });
 
             // Mover el ratón y hacer clic (coordenadas del script original)
             runStep("Haciendo clic en posición (1028, 68)", () -> {
-                moveMouse(1028, 68);
+                moveMouse(915, 78);
                 leftClick();
             });
 
             sleep(2000); // 2 segundos adicionales
 
             // Mover ratón y hacer clic en el primer botón de sitemaps
-            runStep("Haciendo clic en botón de sitemaps (60, 90)", () -> {
-                moveMouse(60, 90);
+            runStep("Haciendo clic en botón de sitemaps (60, 105)", () -> {
+                moveMouse(60, 105);
                 leftClick();
             });
 
@@ -705,14 +856,14 @@ public class bot {
                     });
 
             // Mover ratón y hacer clic en el menú scrap
-            runStep("Haciendo clic en menú scrap (170, 90)", () -> {
-                moveMouse(170, 90);
+            runStep("Haciendo clic en menú scrap (210, 115)", () -> {
+                moveMouse(210, 115);
                 leftClick();
             });
 
             // Mover ratón y hacer clic en start scrap
-            runStep("Haciendo clic en start scrap (175, 200)", () -> {
-                moveMouse(175, 200);
+            runStep("Haciendo clic en start scrap (165, 220)", () -> {
+                moveMouse(165, 220);
                 leftClick();
             });
 
@@ -740,19 +891,54 @@ public class bot {
             runStep("Presionando TAB", () -> {
                 pressKey(KeyEvent.VK_TAB);
             });
-
-            // Mover ratón y hacer clic en el botón final de start scrap
-            runStep("Haciendo clic en botón final de start scrap (155, 215)", () -> {
-                moveMouse(155, 215);
-                leftClick();
+            
+            //Presionar la tecla de ESPACIO
+            runStep("Presionando Space", () -> {
+                pressKey(KeyEvent.VK_SPACE);
             });
+
+
+            /// //////////////////////////////////////////////
+            /// INICIA PROCESO PARA ABRIR LA MÁQUINA VIRTUAL (SOLO LOS LUNES)
+            if (dayOfWeek == Calendar.MONDAY) {
+                runStep("Abriendo VMware Workstation (solo lunes)", () -> {
+                    if (!isCommandAvailable("/usr/bin/vmware") && !isCommandAvailable("vmware")) {
+                        log("No se encontró el comando vmware. Verifique la instalación de VMware Workstation.");
+                        return;
+                    }
+
+                    try {
+                        ProcessBuilder processBuilder = new ProcessBuilder("/usr/bin/vmware");
+                        Map<String, String> env = processBuilder.environment();
+                        setupDisplayEnvironment(env);
+                        processBuilder.start();
+                        log("VMware Workstation iniciado.");
+                    } catch (IOException e) {
+                        log("Error al iniciar VMware Workstation: " + e.getMessage());
+                    }
+
+                    sleep(20000);
+                    // Presionar TAB
+                    runStep("Presionando TAB", () -> {
+                        pressKey(KeyEvent.VK_TAB);
+                    });
+                    
+                    //Presionar la tecla de ESPACIO
+                    runStep("Presionando Space", () -> {
+                        pressKey(KeyEvent.VK_SPACE);
+                    });
+
+                });
+            } else {
+                log("Hoy no es lunes. Se omite el inicio de VMware Workstation.");
+            }
 
             log("Secuencia de automatización completada.");
         } else {
             log("ERROR CRÍTICO: No se pudieron abrir las DevTools. Abortando la secuencia de automatización.");
-            // Opcionalmente, podemos intentar una recuperación o cerrar Firefox
-            runStep("Cerrando Firefox debido a error en DevTools", () -> {
-                closeAllFirefoxWindows();
+            // Opcionalmente, podemos intentar una recuperación o cerrar Chrome
+            runStep("Cerrando Chrome debido a error en DevTools", () -> {
+                closeAllChromeWindows();
             });
         }
     }
