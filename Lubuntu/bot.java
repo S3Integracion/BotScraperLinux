@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Versión en Java del script bot2.sh
  * Optimizado para Ubuntu con X11
  * Compatible con Java 21.0.8
- */
+ **/
 public class bot {
     // Configuración
     private static final String URL = "https://amazon.com";
@@ -32,11 +32,11 @@ public class bot {
     private static final Map<Integer, Integer> DAY_COORDINATES = new HashMap<>();
     static {
         // Coordenadas Y para cada día (Calendar.MONDAY = 2, etc.)
-        DAY_COORDINATES.put(Calendar.MONDAY, 195); // Lunes
-        DAY_COORDINATES.put(Calendar.TUESDAY, 215); // Martes
-        DAY_COORDINATES.put(Calendar.WEDNESDAY, 240); // Miércoles
-        DAY_COORDINATES.put(Calendar.THURSDAY, 265); // Jueves
-        DAY_COORDINATES.put(Calendar.FRIDAY, 290); // Viernes (añadido)
+        DAY_COORDINATES.put(Calendar.MONDAY, 195); // Lunes - Utiliza primer Sitemap
+        DAY_COORDINATES.put(Calendar.TUESDAY, 215); // Martes - Utiliza segundo Sitemap
+        DAY_COORDINATES.put(Calendar.WEDNESDAY, 265); // Miércoles - Utiliza 4to Sitemap
+        DAY_COORDINATES.put(Calendar.THURSDAY, 265); // Jueves - Utiliza 4to Sitemap
+        DAY_COORDINATES.put(Calendar.FRIDAY, 290); // Viernes (añadido) - Utiliza 5to Sitemap
         DAY_COORDINATES.put(Calendar.SATURDAY, 315); // Sábado (añadido)
         DAY_COORDINATES.put(Calendar.SUNDAY, 340); // Domingo (añadido)
     }
